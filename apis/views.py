@@ -25,3 +25,26 @@ def get_json_of_products(url_id):
     # decode json_stirng for show persian character
     json_string = json_string.decode()
     return json_string
+
+def add_products_in_db(url_model, url):
+    """
+    this function add products (of digikala) to database
+    """
+    # get products from digikala (json type)
+    products = get_products(url)
+
+    for product in products:
+        url_model = url_model
+        title_fa = product["title_fa"]
+        title_en = product["title_en"]
+        status = product["status"]
+        brand = product["data_layer"]["brand"]
+        image_url = product["images"]["main"]["url"][0]
+        rating = product["rating"]["rate"]
+        count_of_rating = int(product["rating"]["count"])
+        color = product["default_variant"]["color"]["title"]
+        warranty = product["default_variant"]["warranty"]["title_fa"]
+        seller = product["default_variant"]["seller"]["title"]
+        price = int(product["default_variant"]["price"]["selling_price"])
+        Products.objects.create(url_id=url_model, title_fa=title_fa, title_en=title_en, status=status,          brand=brand,
+                                image_url=image_url, rating=rating, color=color, warranty=warranty, seller=seller, count_of_rating=count_of_rating, price=price)
