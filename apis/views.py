@@ -48,3 +48,27 @@ def add_products_in_db(url_model, url):
         price = int(product["default_variant"]["price"]["selling_price"])
         Products.objects.create(url_id=url_model, title_fa=title_fa, title_en=title_en, status=status,          brand=brand,
                                 image_url=image_url, rating=rating, color=color, warranty=warranty, seller=seller, count_of_rating=count_of_rating, price=price)
+
+class GetUrlAndListData(APIView):
+    """
+    APIView class for get url from user and rerutn data of products
+    """
+    serializer_class = UrlSerializer
+    # validate function for validate url
+    def validate(self):
+        url = self.request.data["url"]
+        # raise error if url is empry
+        if url == "":
+            raise ValidationError({"error": "url is not empty"})
+        # raise error if url is not for digikala url pattern
+        if not (url.startswith("https://www.digikala.com/search/category-mobile-phone/product-list/?page=")):
+            raise ValidationError({"error": "url is not for digikala category"})
+            
+    def post(self, request):
+        url = request.data["url"]   
+        self.validate() # validate data(url)
+        url_model = Urls(url=url)
+        url_model.save()
+        add_products_in_db(url_model, url)
+        json_data = get_json_of_products(url_model)
+        return Response(json_data.encode('utf-8'))
